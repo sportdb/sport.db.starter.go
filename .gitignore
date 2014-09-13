@@ -27,3 +27,8 @@ _testmain.go
 # exclude test dbs
 *.db
 football.db
+
+#############
+# exlcude binaries
+server
+

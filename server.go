@@ -2,6 +2,7 @@ package main
 
 import (
   "fmt"
+  "log"
   "net/http"
   "regexp"
   "strings"
@@ -15,24 +16,21 @@ func handleRoutesWorker( url_path string ) (string,bool) {
 
   if eventsRoute.MatchString( url_path ) {
     return GetEvents(), true
-  }
-
-  m := teamsByEventRoute.FindStringSubmatch( url_path )
-  if m!= nil {
+  } else if m := teamsByEventRoute.FindStringSubmatch( url_path ); m!= nil {
     key := m[1]
     key = strings.Replace( key, "_", "/", -1 )   // replace _ with /
     return GetTeamsByEvent( key ), true
+  } else {
+    return "", false  // not route match found
   }
-
-  return "", false  // not route match found
 }
 
 
 func handleRoutes( w http.ResponseWriter, r *http.Request ) {
 
-  fmt.Println( "url.path: " + r.URL.Path)
+  log.Println( "url.path: " + r.URL.Path )
 
-  buf, handled := handleRoutesWorker( r.URL.Path)
+  buf, handled := handleRoutesWorker( r.URL.Path )
 
   if handled {
     // todo: add mimetype for json too
@@ -46,11 +44,13 @@ func handleRoutes( w http.ResponseWriter, r *http.Request ) {
 
 func main() {
 
+  fmt.Println( "Connecting to ./football.db ..." )
   initDb()
   defer db.Close()
 
-  testQueries()
+  // testQueries()
 
+  fmt.Println( "Starting web server listening on port 9292..." )
   http.HandleFunc( "/", handleRoutes )
   http.ListenAndServe( ":9292", nil )
 

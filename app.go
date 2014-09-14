@@ -2,77 +2,73 @@ package main
 
 import (
   "log"
-  "encoding/json"
 )
 
 
-func GetEvents() string {
+func GetEvents() interface{} {
 
-  type Event struct {
-    Key     string   `json:"key"`
-    Title   string   `json:"title"`
+  // step 1: fetch records
+
+  events := FetchEvents()
+  log.Println( events )
+
+  // step 2: map to json structs for serialization/marshalling
+
+  type JsEvent struct {
+      Key     string   `json:"key"`
+      Title   string   `json:"title"`
   }
-  
-  eventRows := FetchEvents()
-  log.Println( eventRows )
-  
-  events := []Event{}
+  data := []*JsEvent{}
 
-  for _,row := range eventRows {
-    event := &Event {
-      Key:   row.Key,
-      Title: row.Title,
-    }
-    events = append( events, *event )
+  for _,event := range events {
+    data = append( data,
+                   &JsEvent {
+                      Key:   event.Key,
+                      Title: event.Title, } )
   }
 
-  buf, err := json.Marshal( events )
-  checkErr( err )
-  return string(buf)
+  return data
 }
 
 
 
-func GetTeamsByEvent( eventKey string ) string {
+func GetTeamsByEvent( eventKey string ) interface{} {
 
-  type Team struct {
-     Key     string  `json:"key"`
-     Title   string  `json:"title"`
-     Code    string  `json:"code"`
+  // step 1: fetch records
+
+  event := FetchEventByKey( eventKey )
+  log.Println( event )
+
+  teams := FetchTeamsByEvent( event )
+  log.Println( teams )
+
+  // step 2: map to json structs for serialization/marshalling
+
+  type JsTeam struct {
+      Key     string  `json:"key"`
+      Title   string  `json:"title"`
+      Code    string  `json:"code"`
   }
 
-  type Event struct {
-     Key     string `json:"key"`
-     Title   string `json:"title"`
-     Teams[] Team   `json:"teams"`
+  type JsEvent struct {
+      Key     string  `json:"key"`
+      Title   string  `json:"title"`
+      Teams []*JsTeam `json:"teams"`
   }
 
-  eventRow := FetchEventByKey( eventKey )
-  log.Println( eventRow )
-
-  teamRows := FetchTeamsByEvent( eventRow )
-  log.Println( teamRows )
-
-  teams := []Team{}
-
-  for _,row := range teamRows {
-    team := &Team {
-      Key:   row.Key,
-      Title: row.Title,
-      Code:  row.Code,
-    }
-    teams = append( teams, *team )
+  data := JsEvent {
+    Key:   event.Key,
+    Title: event.Title,
   }
 
-  data := &Event {
-    Key:   eventRow.Key,
-    Title: eventRow.Title,
-    Teams: teams,
-  }  
+  for _,team := range teams {
+    data.Teams = append( data.Teams,
+                         &JsTeam{ Key:   team.Key,
+                                  Title: team.Title,
+                                  Code:  team.Code, } )
+  }
 
-  buf, err := json.Marshal( data )
-  checkErr( err )
-  return string(buf)
+
+  return data
 }
-
 

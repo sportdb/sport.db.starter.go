@@ -1,14 +1,13 @@
 package main
 
-
-type EventRow struct {
+type Event struct {
     Key   string
     Title string
 }
 
-type TeamRow struct {
-    Key        string
-    Title      string
-    Code       string
+type Team struct {
+    Key   string
+    Title string
+    Code  string
 }
 

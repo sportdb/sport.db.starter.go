@@ -12,7 +12,7 @@ using the
 
 Step 1: Build yourself a binary using `go`. Type:
 
-    $ go build -o server server.go app.go database.go
+    $ go build -o server server.go app.go database_structs.go database_finders.go
 
 Step 2: Copy an SQLite database e.g. `football.db` into your folder.
 

@@ -9,7 +9,7 @@ import (
 
 func checkErr(err error) {
   if err != nil {
-    log.Fatalln(err)
+    log.Fatal(err)
   }
 }
 
@@ -17,14 +17,14 @@ func checkErr(err error) {
 var db *sql.DB
 
 
-func initDb() {
+func InitDb() {
   var err error
   db, err = sql.Open( "sqlite3", "./football.db" )
   checkErr( err )
 }
 
 
-func FetchTeamsByEvent( event EventRow ) []TeamRow {
+func FetchTeamsByEvent( event Event ) []Team {
 
   query :=
   `SELECT
@@ -41,26 +41,22 @@ func FetchTeamsByEvent( event EventRow ) []TeamRow {
   checkErr( err )
   defer rows.Close()
 
-  columns, err := rows.Columns()
-  checkErr( err )
-  log.Println( columns )
-
-  teams := []TeamRow{}
+  teams := []Team{}
 
   for rows.Next() {
-    var r TeamRow
+    var r Team
     err = rows.Scan( &r.Key, &r.Title, &r.Code )
     checkErr( err )
 
     teams = append( teams, r ) // add new row
   }
-  rows.Close()
   return teams
 }
 
 
 
-func FetchEventByKey( key string ) EventRow {
+func FetchEventByKey( key string ) Event {
+
   query :=
   `SELECT
       e.[key]                    AS event_key,
@@ -70,8 +66,8 @@ func FetchEventByKey( key string ) EventRow {
         INNER JOIN leagues l ON l.id = e.league_id
    WHERE e.[key] = ?`
 
-  var r EventRow
-  
+  var r Event
+
   err := db.QueryRow( query, key ).Scan( &r.Key, &r.Title )
   checkErr( err )
 
@@ -79,7 +75,8 @@ func FetchEventByKey( key string ) EventRow {
 }
 
 
-func FetchEvents() []EventRow {
+func FetchEvents() []Event {
+
   query :=
   `SELECT
       e.[key]                    AS event_key,
@@ -92,16 +89,15 @@ func FetchEvents() []EventRow {
   checkErr( err )
   defer rows.Close()
 
-  events := []EventRow{}
+  events := []Event{}
 
   for rows.Next() {
-    var r EventRow
+    var r Event
     err = rows.Scan( &r.Key, &r.Title )
     checkErr( err )
 
     events = append( events, r ) // add new row
   }
-  rows.Close()
   return events
 }
 

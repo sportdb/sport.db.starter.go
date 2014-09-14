@@ -7,39 +7,45 @@ import (
   "net/url"
   "regexp"
   "strings"
+  "encoding/json"
+  "errors"
 )
 
 
-func handleRoutesWorker( url *url.URL ) (string,bool) {
+func handleRoutes( url *url.URL ) (interface{},error) {
 
   eventsRoute, _        := regexp.Compile( "^/events$" )
   teamsByEventRoute, _  := regexp.Compile( "^/event/([a-z0-9_.]+)/teams$")
 
   if eventsRoute.MatchString( url.Path ) {
-    return GetEvents(), true
+    return GetEvents(), nil
   } else if m := teamsByEventRoute.FindStringSubmatch( url.Path ); m != nil {
-    key := m[1]
-    key = strings.Replace( key, "_", "/", -1 )   // replace _ with / e.g. 2014_15 => 2014/15
-    return GetTeamsByEvent( key ), true
+    key := m[1]   // capture group 1 is event key
+    key = strings.Replace( key, "_", "/", -1 )   // replace _ with / e.g. 2014_15 => 2014/15    
+    return GetTeamsByEvent( key ), nil
   } else {
-    return "", false  // not route match found
+    return nil, errors.New( "No route match found for '" + url.Path + "'" )
   }
 }
 
 
-func handleRoutes( w http.ResponseWriter, r *http.Request ) {
+func handleFunc( w http.ResponseWriter, r *http.Request ) {
 
   // todo: log HTTP verb/method - check query paras too? why? why not?
   log.Println( "url.path: " + r.URL.Path )
 
-  buf, success := handleRoutesWorker( r.URL )
+  data, err := handleRoutes( r.URL )
 
-  if success {
+  if err != nil {
+    fmt.Fprintf( w, err.Error() )  // error - no route match found
+  } else {
     // todo: add mimetype for json too
     // todo: check write to w.write() directly? no need for fmt.Fprintf - why? why not?
-    fmt.Fprintf( w, buf )
-  } else {
-    fmt.Fprintf( w, "no route match found for '" + r.URL.Path + "'" )
+
+    b, err := json.Marshal( data )
+    checkErr( err )
+    log.Println( "json: ", string(b) )
+    fmt.Fprintf( w, string(b) )
   }
 } 
 
@@ -50,12 +56,14 @@ func main() {
   // todo: use a variable for ./football.db - pass along ot initDb 
 
   fmt.Println( "Connecting to ./football.db ..." )
-  initDb()
+  InitDb()
   defer db.Close()
 
   addr := ":9292"
   fmt.Println( "Starting web server listening on " + addr + "..." )
-  http.HandleFunc( "/", handleRoutes )
+  fmt.Println( "Use Ctrl-C to stop" )
+
+  http.HandleFunc( "/", handleFunc )
   http.ListenAndServe( addr, nil )
 
   fmt.Println( "Bye" )

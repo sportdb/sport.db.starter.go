@@ -13,28 +13,15 @@ func checkErr(err error) {
   }
 }
 
-// note: global db object
-var db* sql.DB
+// note: "package global" db object
+var db *sql.DB
+
 
 func initDb() {
-  // how can we assign to "global" db - but still assign err to local var - possible ??
-  dbinner, err := sql.Open( "sqlite3", "./football.db" )
-  db = dbinner
+  var err error
+  db, err = sql.Open( "sqlite3", "./football.db" )
   checkErr( err )
 }
-
-
-type EventRow struct {
-    Key   string
-    Title string
-}
-
-type TeamRow struct {
-    Key        string
-    Title      string
-    Code       string
-}
-
 
 
 func FetchTeamsByEvent( event EventRow ) []TeamRow {

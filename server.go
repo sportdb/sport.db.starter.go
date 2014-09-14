@@ -53,8 +53,6 @@ func main() {
   initDb()
   defer db.Close()
 
-  // testQueries()
-
   addr := ":9292"
   fmt.Println( "Starting web server listening on " + addr + "..." )
   http.HandleFunc( "/", handleRoutes )

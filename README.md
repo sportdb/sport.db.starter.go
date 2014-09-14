@@ -10,9 +10,9 @@ using the
 
 ## Getting Started
 
-Step 1: Build yourself a binary using go. Type:
+Step 1: Build yourself a binary using `go`. Type:
 
-    $ go build server.go app.go database.go
+    $ go build -o server server.go app.go database.go
 
 Step 2: Copy an SQLite database e.g. `football.db` into your folder.
 
@@ -29,9 +29,9 @@ List all events:
 
 - `http://localhost:9292/events`
 
-List all World Cup Brazil 2014 teams:
+List all English Premier League 2014/15 teams:
 
-- `http://localhost:9292/event/world.2014/teams`
+- `http://localhost:9292/event/en.2014_15/teams`
 
 
 And so on. Now change the sources to fit your needs. Be bold. Enjoy.

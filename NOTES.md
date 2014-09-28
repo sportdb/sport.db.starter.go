@@ -10,6 +10,9 @@ Use martini package / lib for routing ?  see [`github.com/go-martini/martini`](h
 
 Use sqlx package / lib for easier struct scans ? see [`github.com/jmoiron/sqlx`](https://github.com/jmoiron/sqlx)
 
+### Cleanups / Todos
+
+change / rename Fetch<xxxx> to FindAll, FindByKey etc.
 
 
 ## Building HTTP JSON APIs w/ Go
